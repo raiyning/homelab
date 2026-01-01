@@ -1,0 +1,50 @@
+USER-SUPPLIED VALUES:
+controllers:
+  main:
+    containers:
+      main:
+        env:
+          PGID: "1000"
+          PUID: "1000"
+          TZ: Europe/London
+        image:
+          repository: linuxserver/radarr
+          tag: latest
+    pod:
+      dnsConfig:
+        options:
+        - name: single-request-reopen
+        - name: ndots
+          value: "1"
+        - name: timeout
+          value: "1"
+        - name: attempts
+          value: "2"
+      nodeSelector:
+        media-storage: "true"
+      securityContext:
+        fsGroup: 1000
+        fsGroupChangePolicy: OnRootMismatch
+    strategy: Recreate
+persistence:
+  config:
+    globalMounts:
+    - path: /config
+    hostPath: /mnt/media/appdata/radarr
+    type: hostPath
+  downloads:
+    globalMounts:
+    - path: /downloads
+    hostPath: /mnt/media/downloads
+    type: hostPath
+  movie:
+    globalMounts:
+    - path: /movie
+    hostPath: /mnt/media/movie
+    type: hostPath
+service:
+  main:
+    controller: main
+    ports:
+      http:
+        port: 7878

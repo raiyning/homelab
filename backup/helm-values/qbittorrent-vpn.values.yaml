@@ -1,0 +1,95 @@
+USER-SUPPLIED VALUES:
+controllers:
+  main:
+    containers:
+      gluetun:
+        env:
+          FIREWALL_INPUT_PORTS: 8080,6881
+          FIREWALL_OUTBOUND_SUBNETS: 192.168.0.0/16,10.0.0.0/8
+          FIREWALL_VPN_INPUT_PORTS: "6881"
+          HTTP_CONTROL_SERVER_ADDRESS: :8000
+          SERVER_COUNTRIES: UK
+          TZ: Europe/London
+          VPN_SERVICE_PROVIDER: mullvad
+          VPN_TYPE: wireguard
+        envFrom:
+        - secretRef:
+            name: mullvad-wg
+        image:
+          repository: qmcgaw/gluetun
+          tag: latest
+        securityContext:
+          capabilities:
+            add:
+            - NET_ADMIN
+      qbittorrent:
+        env:
+          PGID: "1000"
+          PUID: "1000"
+          TZ: Europe/London
+          WEBUI_PORT: "8080"
+        image:
+          repository: linuxserver/qbittorrent
+          tag: latest
+    pod:
+      dnsConfig:
+        options:
+        - name: single-request-reopen
+        - name: ndots
+          value: "1"
+        - name: timeout
+          value: "1"
+        - name: attempts
+          value: "2"
+      nodeSelector:
+        kubernetes.io/hostname: mbp13-2015
+    strategy: Recreate
+ingress:
+  main:
+    className: nginx
+    enabled: true
+    hosts:
+    - host: qbittorrent.lan
+      paths:
+      - path: /
+        pathType: Prefix
+        service:
+          identifier: main
+          port: http
+persistence:
+  config:
+    accessMode: ReadWriteOnce
+    advancedMounts:
+      main:
+        qbittorrent:
+        - path: /config
+    size: 2Gi
+    type: persistentVolumeClaim
+  downloads:
+    globalMounts:
+    - path: /downloads
+    hostPath: /mnt/media/downloads
+    type: hostPath
+  tun:
+    advancedMounts:
+      main:
+        gluetun:
+        - path: /dev/net/tun
+    hostPath: /dev/net/tun
+    hostPathType: CharDevice
+    type: hostPath
+service:
+  bittorrent:
+    controller: main
+    ports:
+      bt-tcp:
+        port: 6881
+        protocol: TCP
+      bt-udp:
+        port: 6881
+        protocol: UDP
+  main:
+    controller: main
+    ports:
+      http:
+        port: 8080
