@@ -1,0 +1,6 @@
+NAME           	NAMESPACE	REVISION	UPDATED                                	STATUS  	CHART             	APP VERSION
+jellyfin       	media    	6       	2025-12-28 02:33:18.839627491 +0000 UTC	deployed	app-template-4.5.0	           
+prowlarr       	media    	3       	2025-12-26 12:23:51.903736966 +0000 UTC	deployed	app-template-4.5.0	           
+qbittorrent-vpn	media    	4       	2025-12-27 19:28:06.738523881 +0000 UTC	deployed	app-template-4.5.0	           
+radarr         	media    	9       	2025-12-27 20:31:39.280732839 +0000 UTC	deployed	app-template-4.5.0	           
+sonarr         	media    	5       	2025-12-27 19:34:21.391979577 +0000 UTC	deployed	app-template-4.5.0	           

@@ -1,0 +1,9 @@
+NAME                	URL                                               
+kubernetes-dashboard	https://kubernetes.github.io/dashboard/           
+jenkins             	https://charts.jenkins.io                         
+prometheus-community	https://prometheus-community.github.io/helm-charts
+kubitodev           	https://charts.kubito.dev                         
+community-charts    	https://community-charts.github.io/helm-charts    
+fonzdm              	https://fonzdm.github.io/servarr                  
+bjw-s               	https://bjw-s-labs.github.io/helm-charts          
+tailscale           	https://pkgs.tailscale.com/helmcharts             
