@@ -2,3 +2,13 @@
 **/*secret*.yaml
 **/*secrets*.yaml
 .env
+
+# Secrets
+**/.env
+
+# Runtime data
+backups/
+tmp/
+
+# Never commit local app configs or media from the server
+srv/
