@@ -1,0 +1,114 @@
+services:
+  gluetun:
+    image: qmcgaw/gluetun:latest
+    container_name: gluetun
+    cap_add:
+      - NET_ADMIN
+    devices:
+      - /dev/net/tun:/dev/net/tun
+    ports:
+      # qBittorrent WebUI (exposed via gluetun because qbit uses gluetun network)
+      - "8080:8080"
+      # qBittorrent torrent ports (optional but recommended)
+      - "6881:6881"
+      - "6881:6881/udp"
+      # If you want Prowlarr through gluetun too, expose its UI port:
+      # - "9696:9696"
+    environment:
+      - TZ=${TZ}
+      - VPN_SERVICE_PROVIDER=mullvad
+      - VPN_TYPE=wireguard
+      - WIREGUARD_PRIVATE_KEY=${MULLVAD_WG_PRIVATE_KEY}
+      - WIREGUARD_ADDRESSES=${MULLVAD_WG_ADDRESS}
+      - SERVER_CITIES=${MULLVAD_CITY}
+      # Allow LAN access to qBittorrent WebUI from your home network
+      - FIREWALL_OUTBOUND_SUBNETS=192.168.0.0/16,10.0.0.0/8
+    volumes:
+      - /srv/media/config/gluetun:/gluetun
+    restart: unless-stopped
+
+  qbittorrent:
+    image: lscr.io/linuxserver/qbittorrent:latest
+    container_name: qbittorrent
+    network_mode: "service:gluetun"
+    depends_on:
+      - gluetun
+    environment:
+      - PUID=${PUID}
+      - PGID=${PGID}
+      - TZ=${TZ}
+      - WEBUI_PORT=8080
+      - TORRENTING_PORT=6881
+    volumes:
+      - /srv/media/config/qbittorrent:/config
+      - /srv/media/downloads:/downloads
+    restart: unless-stopped
+
+  sonarr:
+    image: lscr.io/linuxserver/sonarr:latest
+    container_name: sonarr
+    ports:
+      - "8989:8989"
+    environment:
+      - PUID=${PUID}
+      - PGID=${PGID}
+      - TZ=${TZ}
+    volumes:
+      - /srv/media/config/sonarr:/config
+      - /srv/media/data:/data
+      - /srv/media/downloads:/downloads
+    restart: unless-stopped
+
+  radarr:
+    image: lscr.io/linuxserver/radarr:latest
+    container_name: radarr
+    ports:
+      - "7878:7878"
+    environment:
+      - PUID=${PUID}
+      - PGID=${PGID}
+      - TZ=${TZ}
+    volumes:
+      - /srv/media/config/radarr:/config
+      - /srv/media/data:/data
+      - /srv/media/downloads:/downloads
+    restart: unless-stopped
+
+  prowlarr:
+    image: lscr.io/linuxserver/prowlarr:latest
+    container_name: prowlarr
+    ports:
+      - "9696:9696"
+    environment:
+      - PUID=${PUID}
+      - PGID=${PGID}
+      - TZ=${TZ}
+    volumes:
+      - /srv/media/config/prowlarr:/config
+    restart: unless-stopped
+
+  bazarr:
+    image: lscr.io/linuxserver/bazarr:latest
+    container_name: bazarr
+    ports:
+      - "6767:6767"
+    environment:
+      - PUID=${PUID}
+      - PGID=${PGID}
+      - TZ=${TZ}
+    volumes:
+      - /srv/media/config/bazarr:/config
+      - /srv/media/data:/data
+    restart: unless-stopped
+
+  jellyseerr:
+    image: fallenbagel/jellyseerr:latest
+    container_name: jellyseerr
+    ports:
+      - "5055:5055"
+    environment:
+      - TZ=${TZ}
+      - LOG_LEVEL=info
+    volumes:
+      - /srv/media/config/jellyseerr:/app/config
+    restart: unless-stopped
